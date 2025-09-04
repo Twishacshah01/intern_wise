@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "title": "Frontend Developer Intern",
+    "company": "Neuronex",
+    "city": "Ahmedabad",
+    "mode": "Hybrid",
+    "skills": ["React", "HTML", "CSS", "JavaScript"],
+    "stipend": 12000,
+    "duration_weeks": 12,
+    "tags": ["web", "ui", "frontend"],
+    "apply_url": "https://example.com/apply/neuronex-frontend",
+    "address": "Karnavati University, Gandhinagar"
+  }
+]
