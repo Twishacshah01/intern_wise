@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InternWise — Smart Internship Recommender</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>InternWise</h1>
+    <p>Find roles that match your skills. Click any card to see similar roles.</p>
+    <div class="filters">
+      <input id="city" placeholder="City (e.g., Gandhinagar)" />
+      <input id="skill" placeholder="Skill (e.g., React)" />
+      <select id="mode">
+        <option value="">Any mode</option><option>Remote</option><option>Hybrid</option><option>On-site</option>
+      </select>
+      <input id="stipend" type="number" min="0" placeholder="Min stipend" />
+      <button id="searchBtn">Search</button>
+    </div>
+  </header>
+
+  <main id="results" class="grid"></main>
+
+  <div id="similarPanel" class="drawer hidden">
+    <h2>Similar roles</h2>
+    <div id="similarList"></div>
+    <button id="closeDrawer">Close</button>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:5000/api";
+
+    async function fetchInternships() {
+      const params = new URLSearchParams();
+      const city = document.getElementById('city').value.trim();
+      const skill = document.getElementById('skill').value.trim();
+      const mode = document.getElementById('mode').value;
+      const stipend = document.getElementById('stipend').value;
+      if (city) params.append('city', city);
+      if (skill) params.append('skill', skill);
+      if (mode) params.append('mode', mode);
+      if (stipend) params.append('min_stipend', stipend);
+
+      const res = await fetch(`${API}/internships?${params.toString()}`);
+      const data = await res.json();
+      renderCards(data);
+    }
+
+    function mapsLink(address) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    }
+
+    function renderCards(list) {
+      const root = document.getElementById('results');
+      root.innerHTML = "";
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${item.title}</h3>
+          <p><strong>${item.company}</strong> • ${item.city} • ${item.mode}</p>
+          <p>Skills: ${item.skills.join(', ')}</p>
+          <p>Stipend: ₹${item.stipend} / mo • ${item.duration_weeks} weeks</p>
+          <div class="actions">
+            <a href="${item.apply_url}" target="_blank">Apply</a>
+            <a href="${mapsLink(item.address)}" target="_blank">Maps</a>
+            <button data-id="${item.id}" class="similarBtn">Similar</button>
+          </div>
+        `;
+        root.appendChild(card);
+      });
+
+      document.querySelectorAll('.similarBtn').forEach(btn=>{
+        btn.onclick = async () => {
+          const res = await fetch(`${API}/similar/${btn.dataset.id}`);
+          const items = await res.json();
+          const box = document.getElementById('similarList');
+          box.innerHTML = items.map(i=>`
+            <div class="mini">
+              <div>${i.title} — <em>${i.company}</em> (${i.city})</div>
+              <div>Skills: ${i.skills.slice(0,5).join(', ')}</div>
+              <a href="${i.apply_url}" target="_blank">Apply</a>
+            </div>
+          `).join('');
+          document.getElementById('similarPanel').classList.remove('hidden');
+        }
+      });
+    }
+
+    document.getElementById('closeDrawer').onclick = () =>
+      document.getElementById('similarPanel').classList.add('hidden');
+
+    document.getElementById('searchBtn').onclick = fetchInternships;
+    fetchInternships(); // initial load
+  </script>
+</body>
+</html>
