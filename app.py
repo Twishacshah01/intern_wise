@@ -5,6 +5,10 @@ import json, math
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/")
+def index():
+    return "works"
+
 with open('internships.json', 'r', encoding='utf-8') as f:
     DATA = json.load(f)
 
