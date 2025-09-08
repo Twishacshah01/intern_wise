@@ -7,7 +7,7 @@ CORS(app)
 
 @app.route("/")
 def index():
-    return "works"
+    return render_template("index.html")
 
 with open('internships.json', 'r', encoding='utf-8') as f:
     DATA = json.load(f)
